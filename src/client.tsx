@@ -1,15 +1,22 @@
 import { createRoot } from "react-dom/client";
 import { useState } from "react";
+import { Layout } from "./components/layouts/main";
+import { Header } from "./components/layouts/header";
+import { Body } from "./components/layouts/body";
+import { GameMessage } from "./components/games/game-message";
+import { Boards } from "./components/games/boards";
+import { TurnMessage } from "./components/games/turn-message";
 
 function App() {
   return (
-    <>
-      <h1>Hello, Hono with React!</h1>
-      <h2>Example of useState()</h2>
-      <Counter />
-      <h2>Example of API fetch()</h2>
-      <ClockButton />
-    </>
+    <Layout>
+      <Header />
+      <Body>
+        <GameMessage message="" />
+        <Boards />
+        <TurnMessage message="" />
+      </Body>
+    </Layout>
   );
 }
 
