@@ -7,6 +7,20 @@ import { Boards } from "./components/games/boards";
 import { TurnMessage } from "./components/games/turn-message";
 
 function App() {
+  const fetchAPI = async () => {
+    try {
+      const response = await fetch("/api/games", { method: "POST" });
+
+      if (response.status === 201) {
+        console.log("Game created");
+      } else {
+        console.error("Error creating game");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Layout>
       <Header />
@@ -14,6 +28,7 @@ function App() {
         <GameMessage message="" />
         <Boards />
         <TurnMessage message="" />
+        <button onClick={fetchAPI}>Create Game</button>
       </Body>
     </Layout>
   );

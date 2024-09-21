@@ -1,7 +1,6 @@
 import {
   integer,
   pgSchema,
-  pgTable,
   serial,
   timestamp,
   unique,

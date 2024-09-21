@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { renderToString } from "react-dom/server";
+import { db } from "./db";
+import { games } from "./db/schema";
 
 const app = new Hono();
 
@@ -11,10 +13,15 @@ app.onError((e, c) => {
   return c.text("Internal Server Error", 500);
 });
 
-app.get("/api/clock", (c) => {
-  return c.json({
-    time: new Date().toLocaleTimeString(),
-  });
+app.post("/api/games", async (c) => {
+  try {
+    await db.insert(games).values({ startedAt: new Date() });
+
+    return c.json({}, 201);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error }, 400);
+  }
 });
 
 app.get("*", (c) => {
