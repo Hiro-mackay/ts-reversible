@@ -39,7 +39,7 @@ export const squares = schema.table(
   "squares",
   {
     id: serial("id").primaryKey(),
-    turnId: serial("turn_id").references(() => games.id),
+    turnId: serial("turn_id").references(() => turns.id),
     x: integer("x").notNull(),
     y: integer("y").notNull(),
     disc: integer("disc").notNull(),

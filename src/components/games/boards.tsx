@@ -1,4 +1,4 @@
-import { BOARD_SIZE, INITIAL_BOARD } from "../../consts/game";
+import { BLACK, EMPTY, INITIAL_BOARD, WHITE } from "../../consts/game";
 
 export function Boards() {
   return (
@@ -21,15 +21,15 @@ export function Boards() {
 function Cell({ discStatus }: { discStatus: number }) {
   const Stone = () => {
     switch (discStatus) {
-      case 0:
+      case EMPTY:
         return <></>;
 
-      case 1:
+      case BLACK:
         return (
           <div className="w-8 h-8 rounded-full border border-gray-500 bg-black" />
         );
 
-      case 2:
+      case WHITE:
         return (
           <div className="w-8 h-8 rounded-full border border-gray-500 bg-white" />
         );
