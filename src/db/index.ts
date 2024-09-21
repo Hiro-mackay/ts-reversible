@@ -7,10 +7,6 @@ const url = `postgres://${import.meta.env.VITE_DB_USER}:${
   import.meta.env.VITE_DB_NAME
 }`;
 
-console.log("=======================================");
-console.log(url);
-console.log("=======================================");
-
 const client = new pg.Client({
   connectionString: url,
 });

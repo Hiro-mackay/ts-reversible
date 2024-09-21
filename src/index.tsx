@@ -3,7 +3,8 @@ import { logger } from "hono/logger";
 import { renderToString } from "react-dom/server";
 import { db } from "./db";
 import { games, squares, turns } from "./db/schema";
-import { BLACK, INITIAL_BOARD } from "./consts/game";
+import { BLACK, EMPTY, INITIAL_BOARD } from "./consts/game";
+import { and, desc, eq } from "drizzle-orm";
 
 const app = new Hono();
 
@@ -16,42 +17,79 @@ app.onError((e, c) => {
 
 app.post("/api/games", async (c) => {
   const now = new Date();
-  try {
-    const gameResult = await db
-      .insert(games)
-      .values({ startedAt: now })
-      .returning();
 
-    const gameId = gameResult[0].id;
+  const gameResult = await db
+    .insert(games)
+    .values({ startedAt: now })
+    .returning();
 
-    const turnResult = await db
-      .insert(turns)
-      .values({
-        gameId,
-        turnCount: 0,
-        nextDisc: BLACK,
-        endedAt: now,
-      })
-      .returning();
+  const gameId = gameResult[0].id;
 
-    const turnId = turnResult[0].id;
+  const turnResult = await db
+    .insert(turns)
+    .values({
+      gameId,
+      turnCount: 0,
+      nextDisc: BLACK,
+      endedAt: now,
+    })
+    .returning();
 
-    const squaresData: {
-      turnId: number;
-      x: number;
-      y: number;
-      disc: number;
-    }[] = INITIAL_BOARD.flatMap((line, y) =>
-      line.map((disc, x) => ({ turnId, x, y, disc }))
+  const turnId = turnResult[0].id;
+
+  const squaresData: {
+    turnId: number;
+    x: number;
+    y: number;
+    disc: number;
+  }[] = INITIAL_BOARD.flatMap((line, y) =>
+    line.map((disc, x) => ({ turnId, x, y, disc }))
+  );
+
+  await db.insert(squares).values(squaresData);
+
+  return c.json({}, 201);
+});
+
+app.get("/api/games/latest/turns/:turnCount", async (c) => {
+  const turnCount = c.req.param("turnCount");
+
+  const gameResult = await db
+    .select()
+    .from(games)
+    .orderBy(desc(games.id))
+    .limit(1);
+
+  const turnResult = await db
+    .select()
+    .from(turns)
+    .where(
+      and(
+        eq(turns.gameId, gameResult?.[0].id),
+        eq(turns.turnCount, Number(turnCount))
+      )
     );
 
-    await db.insert(squares).values(squaresData);
+  const squaresResult = await db
+    .select()
+    .from(squares)
+    .where(eq(squares.turnId, turnResult?.[0].id));
 
-    return c.json({}, 201);
-  } catch (error) {
-    console.error(error);
-    return c.json({ error }, 400);
+  if (squaresResult.length === 0) {
+    return c.json({ error: "Not Found" }, 404);
   }
+
+  const board = INITIAL_BOARD.map((line, y) => line.map((_, x) => EMPTY));
+  squaresResult.forEach((square) => {
+    board[square.y][square.x] = square.disc;
+  });
+
+  return c.json({
+    turnCount,
+    board,
+    nextDisc: turnResult[0].nextDisc,
+    innerDisc: null,
+  });
 });
 
 app.get("*", (c) => {
