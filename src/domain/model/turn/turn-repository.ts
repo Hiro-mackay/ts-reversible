@@ -1,12 +1,13 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Turn } from "./turn";
-import { TurnGateway } from "../../infrastructure/turn-gateway";
-import { SquareGateway } from "../../infrastructure/square-gateway";
+import { TurnGateway } from "../../../infrastructure/turn-gateway";
+import { SquareGateway } from "../../../infrastructure/square-gateway";
 import { Disc, toDisc } from "./disc";
-import { MoveGateway } from "../../infrastructure/move-gateway";
+import { MoveGateway } from "../../../infrastructure/move-gateway";
 import { Move } from "./move";
 import { Point } from "./point";
 import { Board } from "./board";
+import { DomainError } from "../../error/domain-error";
 
 const turnGateway = new TurnGateway();
 const squareGateway = new SquareGateway();
@@ -21,19 +22,18 @@ export class TurnRepository {
     const turnRecord = await turnGateway.fondByTurnCount(db, gameId, turnCount);
 
     if (!turnRecord) {
-      throw new Error("Specified turn not found");
+      throw new DomainError(
+        "SpecifiedTurnNotFound",
+        "Specified turn not found"
+      );
     }
 
     const squareRecord = await squareGateway.findByTurnId(db, turnRecord.id);
 
-    if (!squareRecord) {
-      throw new Error("Squares not found");
-    }
-
     const board: Disc[][] = Board.init().discs.map((line, y) =>
       line.map((_, x) => Disc.Empty)
     );
-    
+
     squareRecord.forEach((square) => {
       board[square.y][square.x] = square.disc;
     });
@@ -44,10 +44,14 @@ export class TurnRepository {
       ? new Move(toDisc(moveRecord.disc), new Point(moveRecord.x, moveRecord.y))
       : undefined;
 
+    const nextDisc = turnRecord.nextDisc
+      ? toDisc(turnRecord.nextDisc)
+      : undefined;
+
     return new Turn(
       gameId,
       turnCount,
-      toDisc(turnRecord.nextDisc),
+      nextDisc,
       move,
       new Board(board),
       turnRecord.endedAt

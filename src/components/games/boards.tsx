@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { appClient } from "../../utils/utils.client";
-import { Disc } from "../../domain/turn/disc";
+import { Disc } from "../../domain/model/turn/disc";
 
 export function Boards() {
   // const [board, setBoard] = useState(INITIAL_BOARD);
@@ -81,17 +81,18 @@ function Cell(props: CellProps) {
       return await appClient.api.games.latest.turns.index.$post({
         json: {
           turnCount: props.turnCount + 1,
-          x: props.x,
-          y: props.y,
-          disc: props.turnDisc,
+          move: { x: props.x, y: props.y, disc: props.turnDisc },
         },
       });
     },
-    onSuccess() {
+    onSuccess(res) {
       queryClient.invalidateQueries({
         queryKey: ["games", "latest", "turns"],
       });
       props.setTurnCount(props.turnCount + 1);
+    },
+    onError(error) {
+      console.error(error);
     },
   });
 

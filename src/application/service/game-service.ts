@@ -1,8 +1,8 @@
-import { db } from "../db";
-import { TurnRepository } from "../domain/turn/turn-repository";
-import { Turn } from "../domain/turn/turn";
-import { GameRepository } from "../domain/game/game-repository";
-import { Game } from "../domain/game/game";
+import { db } from "../../db";
+import { TurnRepository } from "../../domain/model/turn/turn-repository";
+import { Turn } from "../../domain/model/turn/turn";
+import { GameRepository } from "../../domain/model/game/game-repository";
+import { Game } from "../../domain/model/game/game";
 
 const gameRepository = new GameRepository();
 const turnRepository = new TurnRepository();

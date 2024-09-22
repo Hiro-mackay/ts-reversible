@@ -1,6 +1,6 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Game } from "./game";
-import { GameGateway } from "../../infrastructure/game-gateway";
+import { GameGateway } from "../../../infrastructure/game-gateway";
 
 const gameGateway = new GameGateway();
 

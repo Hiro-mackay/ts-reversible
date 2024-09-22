@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { TurnService } from "../service/turn-service";
+import { TurnService } from "../application/service/turn-service";
+import { Point } from "../domain/model/turn/point";
+import { toDisc } from "../domain/model/turn/disc";
 
 const turnService = new TurnService();
 
@@ -31,15 +33,15 @@ export const app = new Hono()
       "json",
       z.object({
         turnCount: z.number(),
-        disc: z.number(),
-        x: z.number(),
-        y: z.number(),
+        move: z.object({ disc: z.number(), x: z.number(), y: z.number() }),
       })
     ),
     async (c) => {
-      const { turnCount, disc, x, y } = c.req.valid("json");
+      const { turnCount, move } = c.req.valid("json");
+      const disc = toDisc(move.disc);
+      const point = new Point(move.x, move.y);
 
-      await turnService.registerTurn(turnCount, disc, x, y);
+      await turnService.registerTurn(turnCount, disc, point);
 
       return c.text("OK", 201);
     }

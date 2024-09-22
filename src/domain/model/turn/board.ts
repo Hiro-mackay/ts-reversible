@@ -1,3 +1,4 @@
+import { DomainError } from "../../error/domain-error";
 import { Disc, isOppositeDisc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
@@ -11,13 +12,16 @@ export class Board {
 
   place(move: Move): Board {
     if (this.discs[move.point.y][move.point.x] !== Disc.Empty) {
-      throw new Error("Selected point is not empty");
+      throw new DomainError(
+        "SelectedPointNotEmpty",
+        "Selected point is not empty"
+      );
     }
 
     const flipPoints = this.flipPoints(move);
 
     if (flipPoints.length === 0) {
-      throw new Error("Flip points is empty");
+      throw new DomainError("FlipPointsIsEmpty", "Flip points is empty");
     }
 
     const newDisc = structuredClone(this.discs);
@@ -74,6 +78,28 @@ export class Board {
     flipChecks(-1, -1);
 
     return flipPoints;
+  }
+
+  existsValidMove(disc: Disc): boolean {
+    this.discs.forEach((line, y) => {
+      line.forEach((cell, x) => {
+        if (cell !== Disc.Empty) {
+          return;
+        }
+
+        const move = new Move(disc, new Point(x, y));
+        const flipPoints = this.flipPoints(move);
+
+        if (flipPoints.length !== 0) {
+          return true;
+        }
+      });
+    });
+    return false;
+  }
+
+  countDisc(disc: Disc): number {
+    return this.discs.flat().filter((cell) => cell === disc).length;
   }
 
   private initWallDisc(): Disc[][] {

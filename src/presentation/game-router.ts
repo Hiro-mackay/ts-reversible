@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { GameService } from "../service/game-service";
+import { GameService } from "../application/service/game-service";
 
 const gameService = new GameService();
 

@@ -2,21 +2,17 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { SquareRecord } from "./square-record";
 import { squares } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { Disc, toDisc } from "../domain/turn/disc";
+import { Disc, toDisc } from "../domain/model/turn/disc";
 
 export class SquareGateway {
   async findByTurnId(
     db: NodePgDatabase,
     turnId: number
-  ): Promise<SquareRecord[] | undefined> {
+  ): Promise<SquareRecord[]> {
     const result = await db
       .select()
       .from(squares)
       .where(eq(squares.turnId, turnId));
-
-    if (result.length === 0) {
-      return undefined;
-    }
 
     return result.map(
       (record) =>

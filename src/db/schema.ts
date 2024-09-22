@@ -19,7 +19,7 @@ export const turns = schema.table(
     id: serial("id").primaryKey(),
     gameId: serial("game_id").references(() => games.id),
     turnCount: integer("turn_count").notNull(),
-    nextDisc: integer("next_disc").notNull(),
+    nextDisc: integer("next_disc"),
     endedAt: timestamp("ended_at").notNull(),
   },
   (t) => ({

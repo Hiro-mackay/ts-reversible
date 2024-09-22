@@ -1,4 +1,4 @@
-import { Disc } from "../domain/turn/disc";
+import { Disc } from "../domain/model/turn/disc";
 
 export class SquareRecord {
   constructor(

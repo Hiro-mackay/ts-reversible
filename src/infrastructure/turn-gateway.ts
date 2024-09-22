@@ -22,7 +22,7 @@ export class TurnGateway {
       result[0].id,
       result[0].gameId,
       result[0].turnCount,
-      result[0].nextDisc,
+      result[0].nextDisc ?? undefined,
       result[0].endedAt
     );
   }
@@ -31,7 +31,7 @@ export class TurnGateway {
     db: NodePgDatabase,
     gameId: number,
     turnCount: number,
-    nextDisc: number,
+    nextDisc: number | undefined,
     endedAt: Date
   ): Promise<TurnRecord> {
     const result = await db
@@ -45,7 +45,7 @@ export class TurnGateway {
       record.id,
       record.gameId,
       record.turnCount,
-      record.nextDisc,
+      record.nextDisc ?? undefined,
       record.endedAt
     );
   }

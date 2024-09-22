@@ -1,3 +1,5 @@
+import { DomainError } from "../../error/domain-error";
+
 export const Disc = {
   Empty: 0,
   Black: 1,
@@ -14,7 +16,7 @@ export function toDisc(value: number): Disc {
     case Disc.White:
       return value;
     default:
-      throw new Error(`Invalid disc: ${value}`);
+      throw new DomainError("InvalidDiscValue", `Invalid disc: ${value}`);
   }
 }
 

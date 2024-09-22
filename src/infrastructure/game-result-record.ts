@@ -1,9 +1,8 @@
-export class TurnRecord {
+export class GameResultRecord {
   constructor(
     readonly id: number,
     readonly gameId: number,
-    readonly turnCount: number,
-    readonly nextDisc: number | undefined,
+    readonly winnerDisc: number,
     readonly endedAt: Date
   ) {}
 }

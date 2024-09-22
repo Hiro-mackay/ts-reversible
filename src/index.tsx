@@ -3,6 +3,9 @@ import { logger } from "hono/logger";
 import { renderToString } from "react-dom/server";
 import { app as GameRouter } from "./presentation/game-router";
 import { app as TurnRouter } from "./presentation/turn-router";
+import { DomainError } from "./domain/error/domain-error";
+import { ApplicationError } from "./application/service/error/application-error";
+import { ZodError } from "zod";
 
 const app = new Hono();
 
@@ -10,6 +13,48 @@ const app = new Hono();
 app.use(logger());
 app.onError((e, c) => {
   console.error(`${e}`);
+
+  if (e instanceof DomainError) {
+    return c.json(
+      {
+        type: e.type,
+        message: e.message,
+      },
+      400
+    );
+  }
+
+  if (e instanceof ApplicationError) {
+    const statusCode = (() => {
+      switch (e.type) {
+        case "LatestGameNotFound":
+          return 404;
+
+        default:
+          return 400;
+      }
+    })();
+
+    return c.json(
+      {
+        type: e.type,
+        message: e.message,
+      },
+      statusCode
+    );
+  }
+
+  if (e instanceof ZodError) {
+    return c.json(
+      {
+        type: "ValidationError",
+        message: e.message,
+        errors: e.errors,
+      },
+      400
+    );
+  }
+
   return c.text("Internal Server Error", 500);
 });
 
