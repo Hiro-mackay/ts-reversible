@@ -1,7 +1,7 @@
 import { db } from "../../db";
 import { Point } from "../../domain/model/turn/point";
 import { Disc } from "../../domain/model/turn/disc";
-import { ApplicationError } from "./error/application-error";
+import { ApplicationError } from "../error/application-error";
 import { GameResult } from "../../domain/model/game-result/game-result";
 import { GameRepository } from "../../domain/model/game/game-repository";
 import { TurnRepository } from "../../domain/model/turn/turn-repository";

@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server";
 import { app as GameRouter } from "./presentation/game-router";
 import { app as TurnRouter } from "./presentation/turn-router";
 import { DomainError } from "./domain/error/domain-error";
-import { ApplicationError } from "./application/service/error/application-error";
+import { ApplicationError } from "./application/error/application-error";
 import { ZodError } from "zod";
 
 const app = new Hono();
