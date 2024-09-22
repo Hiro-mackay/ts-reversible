@@ -1,30 +1,53 @@
-import { useEffect, useState } from "react";
-import { BLACK, EMPTY, INITIAL_BOARD, WHITE } from "../../consts/game";
+import { useState } from "react";
+import { BLACK, EMPTY, WHITE } from "../../consts/game";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { appClient } from "../../client";
 
 export function Boards() {
-  const [board, setBoard] = useState(INITIAL_BOARD);
+  // const [board, setBoard] = useState(INITIAL_BOARD);
+  const [turnCount, setTurnCount] = useState(0);
+  // const [turnDisc, setTurnDisc] = useState(EMPTY);
 
-  useEffect(() => {
-    (async function () {
-      const res = await fetch("/api/games/latest/turns/0");
-      const data = await res.json();
+  const query = useQuery({
+    queryKey: ["games", "latest", "turns"],
+    queryFn: async () => {
+      const res = await appClient.api.games.latest.turns[":turnCount"].$get({
+        param: { turnCount: `${turnCount}` },
+      });
 
-      const newBoard = INITIAL_BOARD.map((horizontal, i) =>
-        horizontal.map((_, j) => data[i * 8 + j].disc)
-      );
+      return await res.json();
+    },
+  });
 
-      setBoard(newBoard);
-    })();
-  }, []);
+  if (query.isLoading) {
+    return <div>読み込み中</div>;
+  }
+
+  if (query.error) {
+    console.error(query.error);
+    return <div>エラーが発生しました</div>;
+  }
+
+  if (query.data === undefined) {
+    return <div>ゲームがありません</div>;
+  }
 
   return (
     <div>
       <div className="flex justify-center">
         <div className="flex flex-col border border-gray-300">
-          {board.map((horizontal, i) => (
-            <div key={i} className="flex">
-              {horizontal.map((discStatus, j) => (
-                <Cell key={j} discStatus={discStatus} />
+          {query.data.board.map((horizontal, y) => (
+            <div key={y} className="flex">
+              {horizontal.map((discStatus, x) => (
+                <Cell
+                  key={x}
+                  discStatus={discStatus}
+                  x={x}
+                  y={y}
+                  turnCount={turnCount}
+                  turnDisc={query.data.nextDisc || 0}
+                  setTurnCount={setTurnCount}
+                />
               ))}
             </div>
           ))}
@@ -34,17 +57,53 @@ export function Boards() {
   );
 }
 
-type CellProps = { discStatus: number };
+type CellProps = {
+  discStatus: number;
+  x: number;
+  y: number;
+  turnCount: number;
+  turnDisc: number;
+  setTurnCount: (turnCount: number) => void;
+};
 
 function Cell(props: CellProps) {
+  const queryClient = useQueryClient();
+  const mutations = useMutation({
+    mutationKey: ["games", "latest", "turns"],
+    mutationFn: async () => {
+      if (props.discStatus !== EMPTY) {
+        console.log("すでに石が置かれています");
+        return null;
+      }
+
+      return await appClient.api.games.latest.turns.$post({
+        json: {
+          turnCount: props.turnCount + 1,
+          x: props.x,
+          y: props.y,
+          disc: props.turnDisc,
+        },
+      });
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ["games", "latest", "turns"],
+      });
+      props.setTurnCount(props.turnCount + 1);
+    },
+  });
+
   return (
-    <div className="w-10 h-10 border border-gray-300 flex justify-center items-center">
+    <div
+      className="w-10 h-10 border border-gray-300 flex justify-center items-center"
+      onClick={() => mutations.mutate()}
+    >
       <Stone {...props} />
     </div>
   );
 }
 
-function Stone({ discStatus }: { discStatus: number }) {
+function Stone({ discStatus }: CellProps) {
   switch (discStatus) {
     case EMPTY:
       return <></>;
