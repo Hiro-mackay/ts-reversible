@@ -1,29 +1,24 @@
-import { GameGateway } from "../dataaccess/game-gateway";
 import { db } from "../db";
-import { TurnGateway } from "../dataaccess/turn-gateway";
-import { BLACK, INITIAL_BOARD, INITIAL_TURN_COUNT } from "../consts/game";
-import { SquareGateway } from "../dataaccess/square-gateway";
+import { TurnRepository } from "../domain/turn/turn-repository";
+import { Turn } from "../domain/turn/turn";
+import { GameRepository } from "../domain/game/game-repository";
+import { Game } from "../domain/game/game";
 
-const gameGateway = new GameGateway();
-const turnGateway = new TurnGateway();
-const squareGateway = new SquareGateway();
+const gameRepository = new GameRepository();
+const turnRepository = new TurnRepository();
 
 export class GameService {
   async startGame() {
     const now = new Date();
 
-    const gameRecord = await gameGateway.insert(db, now);
+    const game = await gameRepository.save(db, new Game(undefined, now));
 
-    const gameId = gameRecord?.id;
+    if (!game.id) {
+      throw new Error("Failed to start game");
+    }
 
-    const turnRecord = await turnGateway.insert(
-      db,
-      gameId,
-      INITIAL_TURN_COUNT,
-      BLACK,
-      now
-    );
+    const initTurn = Turn.init(game.id);
 
-    await squareGateway.insertAll(db, turnRecord.id, INITIAL_BOARD);
+    await turnRepository.save(db, initTurn);
   }
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { BLACK, EMPTY, WHITE } from "../../consts/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { appClient } from "../../utils/utils.client";
+import { Disc } from "../../domain/turn/disc";
 
 export function Boards() {
   // const [board, setBoard] = useState(INITIAL_BOARD);
@@ -71,7 +71,7 @@ function Cell(props: CellProps) {
   const mutations = useMutation({
     mutationKey: ["games", "latest", "turns"],
     mutationFn: async () => {
-      if (props.discStatus !== EMPTY) {
+      if (props.discStatus !== Disc.Empty) {
         console.log("すでに石が置かれています");
         return null;
       }
@@ -105,15 +105,15 @@ function Cell(props: CellProps) {
 
 function Stone({ discStatus }: CellProps) {
   switch (discStatus) {
-    case EMPTY:
+    case Disc.Empty:
       return <></>;
 
-    case BLACK:
+    case Disc.Black:
       return (
         <div className="w-8 h-8 rounded-full border border-gray-500 bg-black" />
       );
 
-    case WHITE:
+    case Disc.White:
       return (
         <div className="w-8 h-8 rounded-full border border-gray-500 bg-white" />
       );

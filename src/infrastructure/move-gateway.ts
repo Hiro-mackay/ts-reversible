@@ -1,6 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { MoveRecord } from "./move-record";
 import { moves } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 export class MoveGateway {
   async insert(
@@ -23,6 +24,28 @@ export class MoveGateway {
       record.disc,
       record.x,
       record.y
+    );
+  }
+
+  async findByTurnId(
+    db: NodePgDatabase,
+    turnId: number
+  ): Promise<MoveRecord | undefined> {
+    const result = await db
+      .select()
+      .from(moves)
+      .where(eq(moves.turnId, turnId));
+
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    return new MoveRecord(
+      result[0].id,
+      result[0].turnId,
+      result[0].disc,
+      result[0].x,
+      result[0].y
     );
   }
 }

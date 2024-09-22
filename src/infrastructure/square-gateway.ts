@@ -2,6 +2,7 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { SquareRecord } from "./square-record";
 import { squares } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { Disc, toDisc } from "../domain/turn/disc";
 
 export class SquareGateway {
   async findByTurnId(
@@ -24,7 +25,7 @@ export class SquareGateway {
           record.turnId,
           record.x,
           record.y,
-          record.disc
+          toDisc(record.disc)
         )
     );
   }
@@ -52,7 +53,7 @@ export class SquareGateway {
           record.turnId,
           record.x,
           record.y,
-          record.disc
+          toDisc(record.disc)
         )
     );
   }

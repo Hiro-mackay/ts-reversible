@@ -1,12 +1,6 @@
 import { Hono } from "hono";
-import { db } from "../db";
-import { BLACK, EMPTY, INITIAL_BOARD, WHITE } from "../consts/game";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { GameGateway } from "../dataaccess/game-gateway";
-import { TurnGateway } from "../dataaccess/turn-gateway";
-import { MoveGateway } from "../dataaccess/move-gateway";
-import { SquareGateway } from "../dataaccess/square-gateway";
 import { TurnService } from "../service/turn-service";
 
 const turnService = new TurnService();
