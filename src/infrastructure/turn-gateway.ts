@@ -4,7 +4,7 @@ import { turns } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 
 export class TurnGateway {
-  async fondByIdAndTurnCount(
+  async fondByTurnCount(
     db: NodePgDatabase,
     gameId: number,
     turnCount: number
@@ -12,9 +12,7 @@ export class TurnGateway {
     const result = await db
       .select()
       .from(turns)
-      .where(
-        and(eq(turns.gameId, gameId), eq(turns.turnCount, Number(turnCount)))
-      );
+      .where(and(eq(turns.gameId, gameId), eq(turns.turnCount, turnCount)));
 
     if (result.length === 0) {
       return undefined;

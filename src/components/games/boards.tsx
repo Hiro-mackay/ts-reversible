@@ -32,11 +32,13 @@ export function Boards() {
     return <div>ゲームがありません</div>;
   }
 
+  console.log(query.data);
+
   return (
     <div>
       <div className="flex justify-center">
         <div className="flex flex-col border border-gray-300">
-          {query.data.board.map((horizontal, y) => (
+          {query.data?.board.map((horizontal, y) => (
             <div key={y} className="flex">
               {horizontal.map((discStatus, x) => (
                 <Cell

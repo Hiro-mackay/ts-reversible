@@ -12,11 +12,11 @@ export const app = new Hono()
     zValidator(
       "param",
       z.object({
-        turnCount: z.number(),
+        turnCount: z.string(),
       })
     ),
     async (c) => {
-      const turnCount = c.req.valid("param").turnCount;
+      const turnCount = Number(c.req.valid("param").turnCount);
 
       const responseData = await turnService.findLatestTurn(turnCount);
 

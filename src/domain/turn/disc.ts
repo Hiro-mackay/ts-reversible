@@ -2,6 +2,7 @@ export const Disc = {
   Empty: 0,
   Black: 1,
   White: 2,
+  Wall: 3,
 } as const;
 
 export type Disc = (typeof Disc)[keyof typeof Disc];
@@ -15,4 +16,8 @@ export function toDisc(value: number): Disc {
     default:
       throw new Error(`Invalid disc: ${value}`);
   }
+}
+
+export function isOppositeDisc(disc1: Disc, disc2: Disc): boolean {
+  return disc2 !== Disc.Empty && disc1 !== disc2 && disc2 !== Disc.Wall;
 }

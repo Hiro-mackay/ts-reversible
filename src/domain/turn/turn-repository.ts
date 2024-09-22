@@ -18,11 +18,7 @@ export class TurnRepository {
     gameId: number,
     turnCount: number
   ): Promise<Turn> {
-    const turnRecord = await turnGateway.fondByIdAndTurnCount(
-      db,
-      gameId,
-      turnCount
-    );
+    const turnRecord = await turnGateway.fondByTurnCount(db, gameId, turnCount);
 
     if (!turnRecord) {
       throw new Error("Specified turn not found");
@@ -37,6 +33,7 @@ export class TurnRepository {
     const board: Disc[][] = Board.init().discs.map((line, y) =>
       line.map((_, x) => Disc.Empty)
     );
+    
     squareRecord.forEach((square) => {
       board[square.y][square.x] = square.disc;
     });
