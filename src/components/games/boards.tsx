@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BLACK, EMPTY, WHITE } from "../../consts/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { appClient } from "../../client";
+import { appClient } from "../../utils/utils.client";
 
 export function Boards() {
   // const [board, setBoard] = useState(INITIAL_BOARD);
@@ -76,7 +76,7 @@ function Cell(props: CellProps) {
         return null;
       }
 
-      return await appClient.api.games.latest.turns.$post({
+      return await appClient.api.games.latest.turns.index.$post({
         json: {
           turnCount: props.turnCount + 1,
           x: props.x,

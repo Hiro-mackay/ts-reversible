@@ -6,13 +6,8 @@ import { GameMessage } from "./components/games/game-message";
 import { Boards } from "./components/games/boards";
 import { TurnMessage } from "./components/games/turn-message";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { hc } from "hono/client";
-import { AppType } from ".";
 
 const queryClient = new QueryClient();
-export const appClient = hc<AppType>("/", {
-  headers: { "Content-Type": "application/json" },
-});
 
 function App() {
   return (
