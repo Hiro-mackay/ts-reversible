@@ -4,8 +4,15 @@ import { z } from "zod";
 import { TurnService } from "../application/service/turn-service";
 import { Point } from "../domain/model/turn/point";
 import { toDisc } from "../domain/model/turn/disc";
+import { GamePgRepository } from "../infrastructure/repository/game/game-pg-repository";
+import { TurnPgRepository } from "../infrastructure/repository/turn/turn-pg-repository";
+import { GameResultPgRepository } from "../infrastructure/repository/game-result/game-result-pg-repository";
 
-const turnService = new TurnService();
+const turnService = new TurnService(
+  new GamePgRepository(),
+  new TurnPgRepository(),
+  new GameResultPgRepository()
+);
 
 // base path id "/api/games/latest"
 export const app = new Hono()

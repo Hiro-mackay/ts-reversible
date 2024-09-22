@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { MoveRecord } from "./move-record";
-import { moves } from "../db/schema";
+import { moves } from "../../../db/schema";
 import { eq } from "drizzle-orm";
+import { MoveRecord } from "./move-record";
 
 export class MoveGateway {
   async insert(

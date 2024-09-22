@@ -1,8 +1,8 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { SquareRecord } from "./square-record";
-import { squares } from "../db/schema";
+import { squares } from "../../../db/schema";
 import { eq } from "drizzle-orm";
-import { Disc, toDisc } from "../domain/model/turn/disc";
+import { Disc, toDisc } from "../../../domain/model/turn/disc";
 
 export class SquareGateway {
   async findByTurnId(

@@ -1,6 +1,6 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { TurnRecord } from "./turn-record";
-import { turns } from "../db/schema";
+import { turns } from "../../../db/schema";
 import { and, eq } from "drizzle-orm";
 
 export class TurnGateway {

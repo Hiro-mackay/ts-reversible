@@ -1,6 +1,6 @@
 import { desc } from "drizzle-orm";
-import { db } from "../db";
-import { games } from "../db/schema";
+import { db } from "../../../db";
+import { games } from "../../../db/schema";
 import { GameRecord } from "./game-record";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 

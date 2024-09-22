@@ -1,17 +1,19 @@
 import { db } from "../../db";
-import { TurnRepository } from "../../domain/model/turn/turn-repository";
 import { Turn } from "../../domain/model/turn/turn";
-import { GameRepository } from "../../domain/model/game/game-repository";
 import { Game } from "../../domain/model/game/game";
-
-const gameRepository = new GameRepository();
-const turnRepository = new TurnRepository();
+import { GameRepository } from "../../domain/model/game/game-repository";
+import { TurnRepository } from "../../domain/model/turn/turn-repository";
 
 export class GameService {
+  constructor(
+    private gameRepository: GameRepository,
+    private turnRepository: TurnRepository
+  ) {}
+
   async startGame() {
     const now = new Date();
 
-    const game = await gameRepository.save(db, new Game(undefined, now));
+    const game = await this.gameRepository.save(db, new Game(undefined, now));
 
     if (!game.id) {
       throw new Error("Failed to start game");
@@ -19,6 +21,6 @@ export class GameService {
 
     const initTurn = Turn.init(game.id);
 
-    await turnRepository.save(db, initTurn);
+    await this.turnRepository.save(db, initTurn);
   }
 }
