@@ -4,13 +4,13 @@ import { Game } from "../../domain/model/game/game";
 import { GameRepository } from "../../domain/model/game/game-repository";
 import { TurnRepository } from "../../domain/model/turn/turn-repository";
 
-export class GameService {
+export class StartNewGameUseCase {
   constructor(
     private gameRepository: GameRepository,
     private turnRepository: TurnRepository
   ) {}
 
-  async startGame() {
+  async run() {
     const now = new Date();
 
     const game = await this.gameRepository.save(db, new Game(undefined, now));
