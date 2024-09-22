@@ -1,0 +1,1 @@
+ALTER TABLE "reversible"."games" ALTER COLUMN "started_at" SET NOT NULL;

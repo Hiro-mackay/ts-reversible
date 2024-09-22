@@ -3,11 +3,21 @@ import { logger } from "hono/logger";
 import { renderToString } from "react-dom/server";
 import { db } from "./db";
 import { games, moves, squares, turns } from "./db/schema";
-import { BLACK, EMPTY, INITIAL_BOARD, WHITE } from "./consts/game";
+import {
+  BLACK,
+  EMPTY,
+  INITIAL_BOARD,
+  INITIAL_TURN_COUNT,
+  WHITE,
+} from "./consts/game";
 import { and, desc, eq } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { hc } from "hono/client";
+import { GameGateway } from "./dataaccess/game-gateway";
+import { TurnGateway } from "./dataaccess/turn-gateway";
+import { MoveGateway } from "./dataaccess/move-gateway";
+import { SquareGateway } from "./dataaccess/square-gateway";
 
 const app = new Hono();
 const apiRoutes = app.basePath("/api");
@@ -19,78 +29,77 @@ app.onError((e, c) => {
   return c.text("Internal Server Error", 500);
 });
 
+const gameGateway = new GameGateway();
+const turnGateway = new TurnGateway();
+const moveGateway = new MoveGateway();
+const squareGateway = new SquareGateway();
+
 const routes = apiRoutes
   .post("/games", async (c) => {
     const now = new Date();
 
-    const gameResult = await db
-      .insert(games)
-      .values({ startedAt: now })
-      .returning();
+    const gameRecord = await gameGateway.insert(db, now);
 
-    const gameId = gameResult[0].id;
+    const gameId = gameRecord?.id;
 
-    const turnResult = await db
-      .insert(turns)
-      .values({
-        gameId,
-        turnCount: 0,
-        nextDisc: BLACK,
-        endedAt: now,
-      })
-      .returning();
-
-    const turnId = turnResult[0].id;
-
-    const squaresData: {
-      turnId: number;
-      x: number;
-      y: number;
-      disc: number;
-    }[] = INITIAL_BOARD.flatMap((line, y) =>
-      line.map((disc, x) => ({ turnId, x, y, disc }))
+    const turnRecord = await turnGateway.insert(
+      db,
+      gameId,
+      INITIAL_TURN_COUNT,
+      BLACK,
+      now
     );
 
-    await db.insert(squares).values(squaresData);
+    await squareGateway.insertAll(db, turnRecord.id, INITIAL_BOARD);
 
     return c.json({}, 201);
   })
-  .get("/games/latest/turns/:turnCount", async (c) => {
-    const turnCount = c.req.param("turnCount");
+  .get(
+    "/games/latest/turns/:turnCount",
+    zValidator(
+      "param",
+      z.object({
+        turnCount: z.number(),
+      })
+    ),
+    async (c) => {
+      const turnCount = c.req.valid("param").turnCount;
 
-    const gameResult = await db
-      .select()
-      .from(games)
-      .orderBy(desc(games.id))
-      .limit(1);
+      const gameRecord = await gameGateway.findLatest(db);
 
-    const turnResult = await db
-      .select()
-      .from(turns)
-      .where(
-        and(
-          eq(turns.gameId, gameResult?.[0].id),
-          eq(turns.turnCount, Number(turnCount))
-        )
+      if (!gameRecord) {
+        throw new Error("Latest game not found");
+      }
+
+      const turnRecord = await turnGateway.fondByIdAndTurnCount(
+        db,
+        gameRecord.id,
+        turnCount
       );
 
-    const squaresResult = await db
-      .select()
-      .from(squares)
-      .where(eq(squares.turnId, turnResult?.[0].id));
+      if (!turnRecord) {
+        throw new Error("Specified turn not found");
+      }
 
-    const board = INITIAL_BOARD.map((line, y) => line.map((_, x) => EMPTY));
-    squaresResult.forEach((square) => {
-      board[square.y][square.x] = square.disc;
-    });
+      const squareRecord = await squareGateway.findByTurnId(db, turnRecord.id);
 
-    return c.json({
-      turnCount,
-      board,
-      winner: null,
-      nextDisc: turnResult[0].nextDisc,
-    });
-  })
+      if (!squareRecord) {
+        throw new Error("Squares not found");
+      }
+
+      const board = INITIAL_BOARD.map((line, y) => line.map((_, x) => EMPTY));
+      squareRecord.forEach((square) => {
+        board[square.y][square.x] = square.disc;
+      });
+
+      return c.json({
+        turnCount,
+        board,
+        winner: null,
+        nextDisc: turnRecord.nextDisc,
+      });
+    }
+  )
   .post(
     "/games/latest/turns",
     zValidator(
@@ -107,28 +116,34 @@ const routes = apiRoutes
       const previousTurnCount = turnCount - 1;
 
       // 前の盤面を取得
-      const gameQueryResult = await db
-        .select()
-        .from(games)
-        .orderBy(desc(games.id))
-        .limit(1);
+      const gameRecord = await gameGateway.findLatest(db);
 
-      const gameId = gameQueryResult?.[0].id;
+      if (!gameRecord) {
+        throw new Error("Latest game not found");
+      }
+      const gameId = gameRecord.id;
 
-      const turnQueryResult = await db
-        .select()
-        .from(turns)
-        .where(
-          and(eq(turns.gameId, gameId), eq(turns.turnCount, previousTurnCount))
-        );
+      const previousTurnRecord = await turnGateway.fondByIdAndTurnCount(
+        db,
+        gameId,
+        previousTurnCount
+      );
 
-      const squaresQueryResult = await db
-        .select()
-        .from(squares)
-        .where(eq(squares.turnId, turnQueryResult?.[0].id));
+      if (!previousTurnRecord) {
+        throw new Error("Previous turn not found");
+      }
+
+      const squareRecord = await squareGateway.findByTurnId(
+        db,
+        previousTurnRecord.id
+      );
+
+      if (!squareRecord) {
+        throw new Error("Squares not found");
+      }
 
       const board = INITIAL_BOARD.map((line, y) => line.map((_, x) => EMPTY));
-      squaresQueryResult.forEach((square) => {
+      squareRecord.forEach((square) => {
         board[square.y][square.x] = square.disc;
       });
 
@@ -139,35 +154,17 @@ const routes = apiRoutes
       const now = new Date();
       const nextDisc = disc === BLACK ? WHITE : BLACK;
 
-      const turnInsertResult = await db
-        .insert(turns)
-        .values({
-          gameId,
-          turnCount,
-          nextDisc,
-          endedAt: now,
-        })
-        .returning();
-
-      const turnId = turnInsertResult[0].id;
-
-      const squaresData: {
-        turnId: number;
-        x: number;
-        y: number;
-        disc: number;
-      }[] = board.flatMap((line, y) =>
-        line.map((disc, x) => ({ turnId, x, y, disc }))
+      const turnRecord = await turnGateway.insert(
+        db,
+        gameId,
+        turnCount,
+        nextDisc,
+        now
       );
 
-      await db.insert(squares).values(squaresData);
+      await squareGateway.insertAll(db, turnRecord.id, board);
 
-      await db.insert(moves).values({
-        turnId,
-        x,
-        y,
-        disc,
-      });
+      await moveGateway.insert(db, turnRecord.id, disc, x, y);
 
       return c.text("OK", 201);
     }

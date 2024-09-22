@@ -1,0 +1,1 @@
+ALTER TABLE "reversible"."turns" ALTER COLUMN "next_disc" SET NOT NULL;

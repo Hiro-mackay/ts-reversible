@@ -10,7 +10,7 @@ export const schema = pgSchema("reversible");
 
 export const games = schema.table("games", {
   id: serial("id").primaryKey(),
-  startedAt: timestamp("started_at").defaultNow(),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
 });
 
 export const turns = schema.table(
@@ -19,8 +19,8 @@ export const turns = schema.table(
     id: serial("id").primaryKey(),
     gameId: serial("game_id").references(() => games.id),
     turnCount: integer("turn_count").notNull(),
-    nextDisc: integer("next_disc"),
-    endedAt: timestamp("ended_at"),
+    nextDisc: integer("next_disc").notNull(),
+    endedAt: timestamp("ended_at").notNull(),
   },
   (t) => ({
     unq: unique().on(t.id, t.gameId),

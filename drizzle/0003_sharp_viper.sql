@@ -1,0 +1,1 @@
+ALTER TABLE "reversible"."turns" ALTER COLUMN "ended_at" SET NOT NULL;

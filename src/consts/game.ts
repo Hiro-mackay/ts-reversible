@@ -4,6 +4,8 @@ export const WHITE = 2;
 
 export const BOARD_SIZE = 8;
 
+export const INITIAL_TURN_COUNT = 0;
+
 export const INITIAL_BOARD = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
