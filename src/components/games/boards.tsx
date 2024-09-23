@@ -1,54 +1,39 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { appClient } from "../../utils/utils.client";
 import { Disc } from "../../domain/model/turn/disc";
+import { useMessageContext } from "../message/context";
 
-export function Boards() {
-  // const [board, setBoard] = useState(INITIAL_BOARD);
-  const [turnCount, setTurnCount] = useState(0);
-  // const [turnDisc, setTurnDisc] = useState(EMPTY);
+type Props = {
+  gameId: number;
+  boards: Disc[][];
+  nextDisc: Disc | undefined;
+  turnCount: number;
+  previewMode?: boolean;
+};
 
-  const query = useQuery({
-    queryKey: ["games", "latest", "turns"],
-    queryFn: async () => {
-      const res = await appClient.api.games.latest.turns[":turnCount"].$get({
-        param: { turnCount: `${turnCount}` },
-      });
-
-      return await res.json();
-    },
-  });
-
-  if (query.isLoading) {
-    return <div>読み込み中</div>;
-  }
-
-  if (query.error) {
-    console.error(query.error);
-    return <div>エラーが発生しました</div>;
-  }
-
-  if (query.data === undefined) {
-    return <div>ゲームがありません</div>;
-  }
-
-  console.log(query.data);
-
+export function Boards({
+  gameId,
+  boards,
+  nextDisc,
+  turnCount,
+  previewMode = false,
+}: Props) {
   return (
     <div>
       <div className="flex justify-center">
         <div className="flex flex-col border border-gray-300">
-          {query.data?.board.map((horizontal, y) => (
+          {boards.map((horizontal, y) => (
             <div key={y} className="flex">
               {horizontal.map((discStatus, x) => (
                 <Cell
                   key={x}
+                  gameId={gameId}
                   discStatus={discStatus}
                   x={x}
                   y={y}
                   turnCount={turnCount}
-                  turnDisc={query.data.nextDisc || 0}
-                  setTurnCount={setTurnCount}
+                  turnDisc={nextDisc || 0}
+                  previewMode={previewMode}
                 />
               ))}
             </div>
@@ -60,16 +45,18 @@ export function Boards() {
 }
 
 type CellProps = {
+  gameId: number;
   discStatus: number;
   x: number;
   y: number;
   turnCount: number;
   turnDisc: number;
-  setTurnCount: (turnCount: number) => void;
+  previewMode: boolean;
 };
 
 function Cell(props: CellProps) {
   const queryClient = useQueryClient();
+  const { setMessage } = useMessageContext();
   const mutations = useMutation({
     mutationKey: ["games", "latest", "turns"],
     mutationFn: async () => {
@@ -78,21 +65,31 @@ function Cell(props: CellProps) {
         return null;
       }
 
-      return await appClient.api.games.latest.turns.index.$post({
-        json: {
-          turnCount: props.turnCount + 1,
-          move: { x: props.x, y: props.y, disc: props.turnDisc },
-        },
-      });
+      return await appClient.api.games[":gameId"].turns
+        .$post({
+          param: { gameId: `${props.gameId}` },
+          json: {
+            turnCount: props.turnCount + 1,
+            move: { x: props.x, y: props.y, disc: props.turnDisc },
+          },
+        })
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = (await res.json()) as any;
+
+            if (data?.error) {
+              setMessage({
+                type: data.error.type,
+                text: data.error.message,
+              });
+            }
+          }
+        });
     },
     onSuccess(res) {
       queryClient.invalidateQueries({
-        queryKey: ["games", "latest", "turns"],
+        queryKey: ["games"],
       });
-      props.setTurnCount(props.turnCount + 1);
-    },
-    onError(error) {
-      console.error(error);
     },
   });
 

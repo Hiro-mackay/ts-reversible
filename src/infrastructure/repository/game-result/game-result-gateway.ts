@@ -1,7 +1,8 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { gameResults, games } from "../db/schema";
+
 import { eq } from "drizzle-orm";
 import { GameResultRecord } from "./game-result-record";
+import { gameResults } from "../../../db/schema";
 
 export class GameResultGateway {
   async findByGameId(

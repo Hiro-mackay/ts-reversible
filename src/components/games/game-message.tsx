@@ -1,12 +1,42 @@
-export function GameMessage({ message }: { message: string }) {
-  return message ? (
-    <div
-      className="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50"
-      role="alert"
-    >
-      {message}
+import { useEffect } from "react";
+import { WinnerDisc } from "../../domain/model/game-result/winner-disc";
+import { Disc } from "../../domain/model/turn/disc";
+import { convertToDiscLabel } from "../../utils/utils.client";
+import { useMessageContext } from "../message/context";
+
+type Props = {
+  gameId: number;
+  boards: Disc[][];
+  nextDisc: Disc | undefined;
+  turnCount: number;
+  winnerDisc: WinnerDisc | undefined;
+  previewMode?: boolean;
+};
+
+export function GameMessage({
+  gameId,
+  nextDisc,
+  turnCount,
+  winnerDisc,
+}: Props) {
+  const { message, setMessage } = useMessageContext();
+
+  useEffect(() => {
+    console.log(winnerDisc, message);
+    if (winnerDisc !== undefined && message?.type !== "GameEnded") {
+      setMessage({
+        type: "GameEnded",
+        text: `GameEnded! Winner: ${convertToDiscLabel(winnerDisc)}`,
+      });
+    }
+  }, [winnerDisc, message]);
+
+  return (
+    <div className="bg-slate-50 px-5 py-3 mb-5 text-xs w-80 mx-auto space-y-1">
+      <p>GameId: {gameId}</p>
+      <p>Next Disc: {convertToDiscLabel(nextDisc)}</p>
+      <p>Turn Count: {turnCount}</p>
+      <p>Message: {message?.text}</p>
     </div>
-  ) : (
-    <></>
   );
 }

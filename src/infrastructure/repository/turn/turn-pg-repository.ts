@@ -9,26 +9,17 @@ import { Board } from "../../../domain/model/turn/board";
 import { Move } from "../../../domain/model/turn/move";
 import { Point } from "../../../domain/model/turn/point";
 import { TurnRepository } from "../../../domain/model/turn/turn-repository";
+import { TurnRecord } from "./turn-record";
 
 const turnGateway = new TurnGateway();
 const squareGateway = new SquareGateway();
 const moveGateway = new MoveGateway();
 
 export class TurnPgRepository implements TurnRepository {
-  async findByTurnCount(
+  private async buildTurn(
     db: NodePgDatabase,
-    gameId: number,
-    turnCount: number
+    turnRecord: TurnRecord
   ): Promise<Turn> {
-    const turnRecord = await turnGateway.fondByTurnCount(db, gameId, turnCount);
-
-    if (!turnRecord) {
-      throw new DomainError(
-        "SpecifiedTurnNotFound",
-        "Specified turn not found"
-      );
-    }
-
     const squareRecord = await squareGateway.findByTurnId(db, turnRecord.id);
 
     const board: Disc[][] = Board.init().discs.map((line, y) =>
@@ -50,13 +41,43 @@ export class TurnPgRepository implements TurnRepository {
       : undefined;
 
     return new Turn(
-      gameId,
-      turnCount,
+      turnRecord.gameId,
+      turnRecord.turnCount,
       nextDisc,
       move,
       new Board(board),
       turnRecord.endedAt
     );
+  }
+
+  async findByTurnCount(
+    db: NodePgDatabase,
+    gameId: number,
+    turnCount: number
+  ): Promise<Turn> {
+    const turnRecord = await turnGateway.fondByTurnCount(db, gameId, turnCount);
+
+    if (!turnRecord) {
+      throw new DomainError(
+        "SpecifiedTurnNotFound",
+        "Specified turn not found"
+      );
+    }
+
+    return this.buildTurn(db, turnRecord);
+  }
+
+  async findLatestByGameId(db: NodePgDatabase, gameId: number): Promise<Turn> {
+    const turnRecord = await turnGateway.findLatestByGameId(db, gameId);
+
+    if (!turnRecord) {
+      throw new DomainError(
+        "SpecifiedTurnNotFound",
+        "Specified turn not found"
+      );
+    }
+
+    return this.buildTurn(db, turnRecord);
   }
 
   async save(db: NodePgDatabase, turn: Turn) {

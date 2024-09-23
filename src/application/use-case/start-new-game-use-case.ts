@@ -22,5 +22,7 @@ export class StartNewGameUseCase {
     const initTurn = Turn.init(game.id);
 
     await this.turnRepository.save(db, initTurn);
+
+    return game;
   }
 }

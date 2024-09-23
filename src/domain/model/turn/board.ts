@@ -81,21 +81,16 @@ export class Board {
   }
 
   existsValidMove(disc: Disc): boolean {
-    this.discs.forEach((line, y) => {
-      line.forEach((cell, x) => {
-        if (cell !== Disc.Empty) {
-          return;
+    return this.discs.some((line, y) =>
+      line.some((cell, x) => {
+        if (cell === Disc.Empty) {
+          const move = new Move(disc, new Point(x, y));
+          const flipPoints = this.flipPoints(move);
+          return flipPoints.length !== 0;
         }
-
-        const move = new Move(disc, new Point(x, y));
-        const flipPoints = this.flipPoints(move);
-
-        if (flipPoints.length !== 0) {
-          return true;
-        }
-      });
-    });
-    return false;
+        return false;
+      })
+    );
   }
 
   countDisc(disc: Disc): number {

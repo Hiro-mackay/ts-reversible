@@ -43,6 +43,13 @@
       "when": 1727002174617,
       "tag": "0005_fresh_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1727053408315,
+      "tag": "0006_chief_unicorn",
+      "breakpoints": true
     }
   ]
 }

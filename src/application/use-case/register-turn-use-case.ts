@@ -14,14 +14,24 @@ export class RegisterTurnUseCase {
     private gameResultRepository: GameResultRepository
   ) {}
 
-  async run(turnCount: number, disc: Disc, point: Point) {
+  async run(gameId: number, turnCount: number, disc: Disc, point: Point) {
     const previousTurnCount = turnCount - 1;
 
+    // ゲームが終了しているか
+    const gameResult = await this.gameResultRepository.findByGameId(db, gameId);
+
+    if (gameResult?.winner) {
+      throw new ApplicationError("GameAlreadyEnded", "Game already ended");
+    }
+
     // 前の盤面を取得
-    const game = await this.gameRepository.findLatest(db);
+    const game = await this.gameRepository.findById(db, gameId);
 
     if (!game?.id) {
-      throw new ApplicationError("LatestGameNotFound", "Latest game not found");
+      throw new ApplicationError(
+        "SpecifiedGameNotFound",
+        "Specified game not found"
+      );
     }
 
     const previousTurn = await this.turnRepository.findByTurnCount(

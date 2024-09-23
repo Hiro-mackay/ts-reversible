@@ -6,5 +6,6 @@ const gameGateway = new GameGateway();
 
 export interface GameRepository {
   findLatest(db: NodePgDatabase): Promise<Game | undefined>;
+  findById(db: NodePgDatabase, id: number): Promise<Game | undefined>;
   save(db: NodePgDatabase, game: Game): Promise<Game>;
 }

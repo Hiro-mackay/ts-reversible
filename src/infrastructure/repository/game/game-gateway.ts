@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "../../../db";
 import { games } from "../../../db/schema";
 import { GameRecord } from "./game-record";
@@ -11,6 +11,21 @@ export class GameGateway {
       .from(games)
       .orderBy(desc(games.id))
       .limit(1);
+
+    if (gameResult.length === 0) {
+      return undefined;
+    }
+
+    const game = gameResult[0];
+
+    return new GameRecord(game.id, game.startedAt);
+  }
+
+  async findById(
+    db: NodePgDatabase,
+    id: number
+  ): Promise<GameRecord | undefined> {
+    const gameResult = await db.select().from(games).where(eq(games.id, id));
 
     if (gameResult.length === 0) {
       return undefined;

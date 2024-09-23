@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { TurnRecord } from "./turn-record";
 import { turns } from "../../../db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 export class TurnGateway {
   async fondByTurnCount(
@@ -13,6 +13,30 @@ export class TurnGateway {
       .select()
       .from(turns)
       .where(and(eq(turns.gameId, gameId), eq(turns.turnCount, turnCount)));
+
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    return new TurnRecord(
+      result[0].id,
+      result[0].gameId,
+      result[0].turnCount,
+      result[0].nextDisc ?? undefined,
+      result[0].endedAt
+    );
+  }
+
+  async findLatestByGameId(
+    db: NodePgDatabase,
+    gameId: number
+  ): Promise<TurnRecord | undefined> {
+    const result = await db
+      .select()
+      .from(turns)
+      .where(eq(turns.gameId, gameId))
+      .orderBy(desc(turns.turnCount))
+      .limit(1);
 
     if (result.length === 0) {
       return undefined;

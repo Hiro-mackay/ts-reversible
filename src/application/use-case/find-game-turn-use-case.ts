@@ -1,21 +1,18 @@
 import { db } from "../../db";
-import { Point } from "../../domain/model/turn/point";
-import { Disc } from "../../domain/model/turn/disc";
 import { ApplicationError } from "../error/application-error";
-import { GameResult } from "../../domain/model/game-result/game-result";
 import { GameRepository } from "../../domain/model/game/game-repository";
 import { TurnRepository } from "../../domain/model/turn/turn-repository";
 import { GameResultRepository } from "../../domain/model/game-result/game-result-repository";
 
-export class FindLatestGameTurnUseCase {
+export class FindGameTurnUseCase {
   constructor(
     private gameRepository: GameRepository,
     private turnRepository: TurnRepository,
     private gameResultRepository: GameResultRepository
   ) {}
 
-  async run(turnCount: number) {
-    const game = await this.gameRepository.findLatest(db);
+  async run(gameId: number, turnCount: number) {
+    const game = await this.gameRepository.findById(db, gameId);
 
     if (!game?.id) {
       throw new ApplicationError("LatestGameNotFound", "Latest game not found");
@@ -31,6 +28,7 @@ export class FindLatestGameTurnUseCase {
       : undefined;
 
     return {
+      gameId: game.id,
       turnCount,
       board: turn.board.discs,
       winnerDisc: gameResult?.winner,

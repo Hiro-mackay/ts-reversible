@@ -1,5 +1,14 @@
-import { PropsWithChildren } from "react";
+import { Outlet } from "react-router-dom";
+import { Header } from "./header";
+import { Body } from "./body";
 
-export function Layout({ children }: PropsWithChildren) {
-  return <div className="w-full h-full">{children}</div>;
+export function Layout() {
+  return (
+    <div className="w-full h-full">
+      <Header />
+      <Body>
+        <Outlet />
+      </Body>
+    </div>
+  );
 }

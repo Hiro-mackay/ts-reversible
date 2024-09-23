@@ -16,6 +16,16 @@ export class GamePgRepository implements GameRepository {
     return new Game(gameRecord.id, gameRecord.startedAt);
   }
 
+  async findById(db: NodePgDatabase, id: number): Promise<Game | undefined> {
+    const gameRecord = await gameGateway.findById(db, id);
+
+    if (!gameRecord) {
+      return undefined;
+    }
+
+    return new Game(gameRecord.id, gameRecord.startedAt);
+  }
+
   async save(db: NodePgDatabase, game: Game): Promise<Game> {
     const gameRecord = await gameGateway.insert(db, game.startedAt);
 

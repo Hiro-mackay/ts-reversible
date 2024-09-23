@@ -23,7 +23,7 @@ export const turns = schema.table(
     endedAt: timestamp("ended_at").notNull(),
   },
   (t) => ({
-    unq: unique().on(t.id, t.gameId),
+    unq: unique().on(t.turnCount, t.gameId),
   })
 );
 

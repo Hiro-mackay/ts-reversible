@@ -1,0 +1,2 @@
+ALTER TABLE "reversible"."turns" DROP CONSTRAINT "turns_id_game_id_unique";--> statement-breakpoint
+ALTER TABLE "reversible"."turns" ADD CONSTRAINT "turns_turn_count_game_id_unique" UNIQUE("turn_count","game_id");

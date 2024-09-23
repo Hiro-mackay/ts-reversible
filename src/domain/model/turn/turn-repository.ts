@@ -8,5 +8,7 @@ export interface TurnRepository {
     turnCount: number
   ): Promise<Turn>;
 
+  findLatestByGameId(db: NodePgDatabase, gameId: number): Promise<Turn>;
+
   save(db: NodePgDatabase, turn: Turn): Promise<void>;
 }
