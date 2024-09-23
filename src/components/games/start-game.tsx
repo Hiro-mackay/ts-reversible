@@ -1,9 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { appClient } from "../../utils/utils.client";
 import { useNavigate } from "react-router-dom";
+import { useMessageContext } from "../message/context";
 
 export function StartNewGameButton() {
   const nav = useNavigate();
+  const { reset } = useMessageContext();
   const mutation = useMutation({
     mutationKey: ["games", "start"],
     mutationFn: async () => {
@@ -12,6 +14,7 @@ export function StartNewGameButton() {
       return await res.json();
     },
     onSuccess(data) {
+      reset();
       nav(`/games/${data.id}/play`);
     },
   });

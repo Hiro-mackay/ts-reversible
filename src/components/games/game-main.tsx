@@ -22,8 +22,6 @@ export function GameMain() {
         },
       });
 
-      console.log({ res });
-
       const responseData = await res.json();
 
       if (!res.ok) {
@@ -59,6 +57,11 @@ export function GameMain() {
     if (applicationError?.type === "ValidationError") {
       throw new Error(applicationError.message);
     }
+
+    if (applicationError?.type === "InternalServerError") {
+      throw new Error(applicationError.message);
+    }
+
     setMessage({
       type: applicationError.type,
       text: applicationError.message,
@@ -69,10 +72,8 @@ export function GameMain() {
     return <div>ゲームがありません</div>;
   }
 
-
-
   return (
-    <>
+    <div className="py-5">
       <GameMessage
         gameId={query.data.gameId}
         boards={query.data.board}
@@ -86,6 +87,6 @@ export function GameMain() {
         nextDisc={query.data.nextDisc}
         turnCount={query.data.turnCount}
       />
-    </>
+    </div>
   );
 }

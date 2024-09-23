@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { appClient, convertToDiscLabel } from "../../utils/utils.client";
-import { XataHttpDriver } from "drizzle-orm/xata-http";
 import { useMessageContext } from "../message/context";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type Props = {
   limit?: number;
@@ -10,6 +9,8 @@ type Props = {
 
 export function GameHistory({ limit }: Props) {
   const { setMessage } = useMessageContext();
+  const { reset } = useMessageContext();
+  const nav = useNavigate();
   const query = useQuery({
     queryKey: ["games", "history"],
     queryFn: async () => {
@@ -34,26 +35,27 @@ export function GameHistory({ limit }: Props) {
   });
 
   return (
-    <div className="border rounded-md py-5">
-      <table className="border-collapse table-auto w-full text-sm ">
-        <thead>
+    <div className="border rounded-md h-full overflow-scroll relative">
+      {/* <div className="bg-slate-50/90 backdrop-blur-sm ring-1 ring-slate-900/10"></div> */}
+      <table className="table-auto w-full text-sm border-separate border-spacing-0">
+        <thead className="sticky top-0 ring-1 ring-slate-100">
           <tr>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left">
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm">
               GameID
             </th>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left">
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm">
               Winner
             </th>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left">
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm">
               White Moves
             </th>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left">
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm">
               Black Moves
             </th>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left">
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm">
               Ended At
             </th>
-            <th className="border-b font-medium px-4 pt-0 pb-3 text-slate-500 text-left w-24"></th>
+            <th className="px-4 pt-5 pb-3 text-slate-500 text-left font-semibold backdrop-blur-sm w-24"></th>
           </tr>
         </thead>
         <tbody>
@@ -78,25 +80,36 @@ export function GameHistory({ limit }: Props) {
                 </td>
                 <td className="border-b border-slate-100 p-4 text-slate-600">
                   <div className="flex justify-center items-center">
-                    <Link to={`/games/${game.gameId}/play`}>
-                      <button className="w-8 h-8 flex justify-center items-center rounded-full hover:bg-slate-100">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-5 h-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
-                          />
-                        </svg>
-                      </button>
-                    </Link>
-                    <button className="w-8 h-8 flex justify-center items-center rounded-full hover:bg-slate-100">
+                    <button
+                      className="w-8 h-8 flex justify-center items-center rounded-full duration-100 hover:bg-slate-50"
+                      onClick={() => {
+                        reset();
+                        nav(`/games/${game.gameId}/play`);
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
+                        />
+                      </svg>
+                    </button>
+
+                    <button
+                      className="w-8 h-8 flex justify-center items-center rounded-full duration-100 hover:bg-slate-50"
+                      onClick={() => {
+                        reset();
+                        nav(`/games/${game.gameId}/preview`);
+                      }}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"

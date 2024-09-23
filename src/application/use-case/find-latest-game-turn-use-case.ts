@@ -29,6 +29,7 @@ export class FindLatestGameTurnUseCase {
       board: turn.board.discs,
       winnerDisc: gameResult?.winner,
       nextDisc: turn.nextDisc,
+      isLatest: true,
     };
   }
 }

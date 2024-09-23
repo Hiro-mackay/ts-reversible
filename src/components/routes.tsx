@@ -8,6 +8,7 @@ import { Layout } from "./layouts/main";
 import { WelcomePage } from "./games/welcome";
 import { GameMain } from "./games/game-main";
 import { ErrorBoundary } from "./error";
+import { GamePreview } from "./games/game-preview";
 
 function Routes() {
   return (
@@ -16,6 +17,11 @@ function Routes() {
       <Route
         path="/games/:gameId/play"
         element={<GameMain />}
+        errorElement={<ErrorBoundary />}
+      />
+      <Route
+        path="/games/:gameId/preview"
+        element={<GamePreview />}
         errorElement={<ErrorBoundary />}
       />
     </BrowserRoutes>

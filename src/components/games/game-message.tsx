@@ -22,7 +22,6 @@ export function GameMessage({
   const { message, setMessage } = useMessageContext();
 
   useEffect(() => {
-    console.log(winnerDisc, message);
     if (winnerDisc !== undefined && message?.type !== "GameEnded") {
       setMessage({
         type: "GameEnded",
@@ -32,7 +31,7 @@ export function GameMessage({
   }, [winnerDisc, message]);
 
   return (
-    <div className="bg-slate-50 px-5 py-3 mb-5 text-xs w-80 mx-auto space-y-1">
+    <div className="bg-slate-50 px-5 py-3 mb-5 text-xs w-96 mx-auto space-y-1 rounded-sm">
       <p>GameId: {gameId}</p>
       <p>Next Disc: {convertToDiscLabel(nextDisc)}</p>
       <p>Turn Count: {turnCount}</p>

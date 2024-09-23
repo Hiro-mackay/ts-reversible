@@ -60,8 +60,13 @@ function Cell(props: CellProps) {
   const mutations = useMutation({
     mutationKey: ["games", "latest", "turns"],
     mutationFn: async () => {
+      if (props.previewMode) {
+        console.log("Game disabled because preview mode.");
+        return null;
+      }
+
       if (props.discStatus !== Disc.Empty) {
-        console.log("すでに石が置かれています");
+        console.log("Already occupied.");
         return null;
       }
 
@@ -95,7 +100,7 @@ function Cell(props: CellProps) {
 
   return (
     <div
-      className="w-10 h-10 border border-gray-300 flex justify-center items-center"
+      className="w-12 h-12 border border-gray-300 flex justify-center items-center"
       onClick={() => mutations.mutate()}
     >
       <Stone {...props} />
@@ -110,12 +115,12 @@ function Stone({ discStatus }: CellProps) {
 
     case Disc.Black:
       return (
-        <div className="w-8 h-8 rounded-full border border-gray-500 bg-black" />
+        <div className="w-10 h-10 rounded-full border border-gray-500 bg-black" />
       );
 
     case Disc.White:
       return (
-        <div className="w-8 h-8 rounded-full border border-gray-500 bg-white" />
+        <div className="w-10 h-10 rounded-full border border-gray-500 bg-white" />
       );
 
     default:

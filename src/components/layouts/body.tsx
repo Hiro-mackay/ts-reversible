@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
 
 export function Body({ children }: PropsWithChildren) {
-  return <div className="p-5">{children}</div>;
+  return <div className="flex-1 overflow-hidden">{children}</div>;
 }

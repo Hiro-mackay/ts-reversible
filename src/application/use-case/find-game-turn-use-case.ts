@@ -23,6 +23,11 @@ export class FindGameTurnUseCase {
       turnCount
     );
 
+    const latestTurn = await this.turnRepository.findLatestByGameId(
+      db,
+      game.id
+    );
+
     const gameResult = turn.gameEnded()
       ? await this.gameResultRepository.findByGameId(db, game.id)
       : undefined;
@@ -33,6 +38,7 @@ export class FindGameTurnUseCase {
       board: turn.board.discs,
       winnerDisc: gameResult?.winner,
       nextDisc: turn.nextDisc,
+      isLatest: latestTurn.turnCount === turn.turnCount,
     };
   }
 }

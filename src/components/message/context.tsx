@@ -11,11 +11,15 @@ export type MessageContextType = {
   setMessage: Dispatch<
     SetStateAction<{ type: string; text: string } | undefined>
   >;
+  reset: () => void;
 };
 
 const MessageContext = createContext<MessageContextType>({
   message: undefined,
   setMessage: () => {
+    return undefined;
+  },
+  reset: () => {
     return undefined;
   },
 });
@@ -32,8 +36,12 @@ export function MessageContextProvider({
   const [message, setMessage] =
     useState<MessageContextType["message"]>(undefined);
 
+  const reset = () => {
+    setMessage(undefined);
+  };
+
   return (
-    <MessageContext.Provider value={{ message, setMessage }}>
+    <MessageContext.Provider value={{ message, setMessage, reset }}>
       {children}
     </MessageContext.Provider>
   );
