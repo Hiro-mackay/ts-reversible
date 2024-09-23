@@ -5,6 +5,8 @@
     "build": "vite build --mode client && vite build",
     "preview": "wrangler pages dev dist",
     "deploy": "$npm_execpath run build && wrangler pages deploy dist",
+    "docker:up": "docker-compose up -d",
+    "db:init": "pnpm run db:generate && pnpm run db:migrate",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"

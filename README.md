@@ -1,8 +1,17 @@
-```txt
-npm install
-npm run dev
+## First
+
+```bash
+pnpm install
+
+# Docker setup
+pnpm run docker:up
+
+# migrate database
+pnpm run db:init
 ```
 
-```txt
-npm run deploy
+## Start
+
+```bash
+pnpm run dev
 ```
